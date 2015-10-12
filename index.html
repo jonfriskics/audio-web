@@ -1,0 +1,185 @@
+<html>
+  <head>
+    <title>Hi</title>
+    <style>
+      audio {
+        width: 100%;
+      }
+    </style>
+    <script>
+      "use strict";
+      window.onload = function() {
+        var audio = document.getElementById('audio');
+        var wavesurfer = Object.create(WaveSurfer);
+        var regions = [];
+        var selection = null;
+
+        wavesurfer.init({
+          container: document.getElementById('waveform'),
+          waveColor: 'violet',
+          progressColor: 'purple',
+          cursorColor: 'navy'
+        });
+
+        wavesurfer.on('ready', function() {
+
+          // add event handlers after wavesurfer is ready to go to prevent bad clicks
+          document.getElementById('play').addEventListener('click', function(e) {
+            e.preventDefault();
+            playAudio();
+          }, false);
+
+          document.getElementById('pause').addEventListener('click', function(e) {
+            e.preventDefault();
+            pauseAudio();
+          }, false);
+
+          document.getElementById('story1').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          document.getElementById('story2').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          document.getElementById('story3').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          document.getElementById('story4').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          document.getElementById('story5').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          document.getElementById('story6').addEventListener('click', function(e) {
+            e.preventDefault();
+            createRegion(this.attributes.id);
+          }, false);
+
+          // after the region position is updated
+          wavesurfer.on('region-update-end', function(r) {
+            console.log("region-update-end");
+            console.log(r);
+            console.log(displayMinutesFromSeconds(r.start));
+            var el = document.querySelector("." + r.id);
+            el.removeChild(el.firstChild);
+            el.appendChild(document.createTextNode(displayMinutesFromSeconds(r.start)))
+          });
+
+          wavesurfer.on('region-created', function(r) {
+            console.log("region-created");
+            console.log(r);
+            var el = document.querySelector("." + r.id);
+            el.appendChild(document.createTextNode(displayMinutesFromSeconds(r.start)))
+          });
+
+        });
+
+        wavesurfer.load('71.mp3');
+
+        function contains(needle, haystack) {
+          console.log("contains: " + needle);
+          if(regions.length > 0) {
+            for(let h of haystack) {
+              if(h.id == needle) {
+                console.log("EXISTS h.id: " + h.id + " n.id: " + needle);
+                return true;
+              } else {
+                console.log("DOESNT EXIST h.id: " + h.id + " n.id: " + needle);
+                return false;
+              }
+            }
+          }
+          return false;
+        }
+
+        function playAudio() {
+          wavesurfer.play();
+        }
+
+        function pauseAudio() {
+          wavesurfer.pause();
+        }
+
+        function displayMinutesFromSeconds(t) {
+          var roundedTime = Math.floor(t);
+
+          if(roundedTime < 10) {
+            var displayedTime = "0:0" + roundedTime;
+          } else if(roundedTime >= 10 && roundedTime < 60) {
+            var displayedTime = "0:" + roundedTime;
+          } else if(roundedTime >= 60 && (Math.floor(roundedTime) - 60 * (Math.floor(roundedTime / 60))) < 10) {
+            var displayedTime = Math.floor(roundedTime / 60) + ":0" + (Math.floor(roundedTime) - 60 * (Math.floor(roundedTime / 60)));
+          } else {
+            var displayedTime = Math.floor(roundedTime / 60) + ":" + (Math.floor(roundedTime) - 60 * (Math.floor(roundedTime / 60)));
+          }
+          return displayedTime;
+        }
+
+        function captureTime() {          
+          var li = document.createElement('li');
+
+          li.appendChild(document.createTextNode(displayMinutesFromSeconds(wavesurfer.getCurrentTime())));
+
+          document.getElementById('times').appendChild(li);
+
+          console.log(wavesurfer.getCurrentTime());
+          var region = wavesurfer.addRegion({
+            id: 'story',
+            start: wavesurfer.getCurrentTime(),
+            end: wavesurfer.getCurrentTime()+1,
+            color: "rgba(255, 0, 0, 0.8)",
+            loop: false,
+            drag: true,
+            resize: false
+          });
+
+          wavesurfer.on('region-update-end', function() {
+            console.log(displayMinutesFromSeconds(wavesurfer.getCurrentTime()));
+          });
+
+        }
+
+        function createRegion(regionId) {
+          console.log("create region: " + regionId.value);
+
+          wavesurfer.addRegion({
+            id: regionId.value,
+            start: wavesurfer.getCurrentTime(),
+            end: wavesurfer.getCurrentTime()+.8,
+            color: "rgba(" + Math.floor(Math.random()*255) + ", " + Math.floor(Math.random()*255) + ", " + Math.floor(Math.random()*255) + ", 0.8)",
+            loop: false,
+            drag: true,
+            resize: false
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="waveform"></div>
+
+    <p><a id="play" href="">Play</a></p>
+    <p><a id="pause" href="">Pause</a></p>
+
+    <div>
+      <div><a id="story1" href="">Story 1</a> <span class="story1"></span></div>
+      <div><a id="story2" href="">Story 2</a> <span class="story2"></span></div>
+      <div><a id="story3" href="">Story 3</a> <span class="story3"></span></div>
+      <div><a id="story4" href="">Story 4</a> <span class="story4"></span></div>
+      <div><a id="story5" href="">Story 5</a> <span class="story5"></span></div>
+      <div><a id="story6" href="">Story 6</a> <span class="story6"></span></div>
+    </div>
+
+    <script type="text/javascript" src="wavesurfer.min.js"></script>
+    <script type="text/javascript" src="plugin/wavesurfer.regions.js"></script>
+  </body>
+</html>
